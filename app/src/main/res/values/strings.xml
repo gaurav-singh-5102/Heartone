@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">Heartone</string>
+    <string name="login_info">Login with Spotify to get music recommendations based on your mood.</string>
+    <string name="btn_string">Login with Spotify</string>
+    <string name="take_picture">Take a picture</string>
+    <string name="OR">OR</string>
+    <string name="mood_select">Select a mood from below</string>
+</resources>
