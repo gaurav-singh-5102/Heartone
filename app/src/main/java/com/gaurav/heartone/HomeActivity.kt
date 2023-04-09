@@ -4,8 +4,11 @@ package com.gaurav.heartone
 // Activity to Authenticate the user using spotify auth library
 
 import android.content.Context
+import android.content.ContextWrapper
 import android.content.Intent
 import android.content.SharedPreferences
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.os.Bundle
 import android.widget.Button
 import android.widget.Toast
@@ -13,17 +16,29 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.room.Room
 import com.gaurav.heartone.repository.AppDatabase
+import com.gaurav.heartone.repository.PlaylistEntity
+import com.gaurav.heartone.repository.SongEntity
 import com.gaurav.heartone.repository.UserEntity
-import com.gaurav.heartone.repository.UserEntityDao
 import com.google.gson.Gson
+import com.google.gson.internal.LinkedTreeMap
 import com.spotify.sdk.android.auth.AuthorizationClient
 import com.spotify.sdk.android.auth.AuthorizationClient.getResponse
 import com.spotify.sdk.android.auth.AuthorizationRequest
 import com.spotify.sdk.android.auth.AuthorizationResponse
 import okhttp3.OkHttpClient
 import okhttp3.Request
+import java.io.File
+import java.io.FileOutputStream
+import java.io.IOException
+import java.io.InputStream
+import java.net.HttpURLConnection
+import java.net.URL
+
 
 class HomeActivity : AppCompatActivity() {
+
+    private val httpClient = OkHttpClient()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_home)
@@ -44,7 +59,10 @@ class HomeActivity : AppCompatActivity() {
                     "playlist-read-private",
                     "streaming",
                     "app-remote-control",
-                    "user-top-read"
+                    "user-top-read",
+                    "playlist-read-collaborative",
+                    "user-library-read",
+                    "user-read-playback-state"
                 )
             ).build()
 
@@ -83,34 +101,65 @@ class HomeActivity : AppCompatActivity() {
         val sharedPreferences : SharedPreferences? = getSharedPreferences("sharedPrefs",
             Context.MODE_PRIVATE)
         val accessToken = sharedPreferences?.getString("ACCESS_TOKEN",null)
-        val HttpClient = OkHttpClient()
         val request = Request.Builder()
             .url("https://api.spotify.com/v1/me")
             .addHeader("Authorization", "Bearer $accessToken")
             .build()
         Thread{
-            HttpClient.newCall(request).execute().use { response ->
+            httpClient.newCall(request).execute().use { response ->
                 val responseString = response.body?.string()
                 val responseMap = Gson().fromJson(responseString,Map::class.java)
-                val editor = sharedPreferences?.edit()
-                editor?.apply{
-                    putString("display_name", responseMap["display_name"] as String?)
-                    putString("user_id",responseMap["id"] as String)
-                    putString("user_uri",responseMap["uri"] as String)
-                }?.apply()
+                val User = UserEntity(
+                    responseMap["id"] as String,accessToken,
+                    responseMap["display_name"] as String?)
                 val db = Room.databaseBuilder(
                     applicationContext,
                     AppDatabase::class.java, "databse-name"
                 ).build()
-                val User = UserEntity(
-                    responseMap["id"] as String,accessToken,
-                    responseMap["display_name"] as String?)
                 val userDao = db.userDao()
                 userDao.insertAll(User)
-                println(userDao.getAll())
             }
+            getPlaylists()
         }.start()
     }
 
+    fun getPlaylists(){
+        Thread{
+            val db = Room.databaseBuilder(
+                applicationContext,
+                AppDatabase::class.java, "databse-name"
+            ).fallbackToDestructiveMigration().build()
+            val playlistDao = db.playlistDao()
+            val user = db.userDao().getAll()[0]
+            val request = Request.Builder()
+                .url("https://api.spotify.com/v1/users/${user.id}/playlists")
+                .addHeader("Authorization", "Bearer ${user.token}")
+                .build()
+                httpClient.newCall(request).execute().use { response ->
+                    val responseString = response.body?.string()
+                    val responseMap = Gson().fromJson(responseString,Map::class.java)
+                    val items = responseMap["items"] as List<LinkedTreeMap<String,*>>
+                    for (item in items) {
+                        val tempId = item["id"]
+                        val tempName = item["name"]
+                        val tempImageURL = item["images"] as ArrayList<Map<*,*>>
+
+                        val trackData = item["tracks"] as LinkedTreeMap<String,*>
+                        val tempTrackCount = trackData["total"]
+                        val tempTracks = trackData["href"]
+                        val tempPlaylist = tempId?.let { PlaylistEntity(it as String,
+                            tempName as String?,
+                            tempImageURL[0]["url"] as String?, tempTrackCount as Double?,
+                            tempTracks as String?
+                        ) }
+                        if (tempPlaylist != null) {
+                            playlistDao.insertAll(tempPlaylist)
+                        }
+                    }
+                }
+
+        }.start()
+
+    }
 }
 

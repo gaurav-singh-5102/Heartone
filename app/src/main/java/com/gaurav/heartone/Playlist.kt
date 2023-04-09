@@ -1,26 +1,22 @@
 package com.gaurav.heartone
 
-import android.content.ClipData.Item
+import android.app.Activity
 import android.os.Bundle
-import androidx.fragment.app.Fragment
+import android.os.Handler
+import android.os.Looper
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.room.Room
+import com.gaurav.heartone.repository.AppDatabase
+import com.gaurav.heartone.repository.PlaylistEntity
 
-// TODO: Rename parameter arguments, choose names that match
-// the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-private const val ARG_PARAM1 = "param1"
-private const val ARG_PARAM2 = "param2"
 
-/**
- * A simple [Fragment] subclass.
- * Use the [Playlist.newInstance] factory method to
- * create an instance of this fragment.
- */
-class Playlist : Fragment(R.layout.fragment_playlist) {
 
+class Playlist : Fragment(R.layout.fragment_playlist){
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -32,12 +28,12 @@ class Playlist : Fragment(R.layout.fragment_playlist) {
 
     override fun onStart() {
         super.onStart()
-        val data = listOf<PlaylistItem>(PlaylistItem("Item1"),
-            PlaylistItem("Item2"), PlaylistItem
-        ("item3")
-        )
+        val data : List<PlaylistEntity>
+        val db = context?.let { Room.databaseBuilder(it,AppDatabase::class.java,"databse-name").allowMainThreadQueries().fallbackToDestructiveMigration().build() }
+        val playlistDao = db?.playlistDao()
+        data = playlistDao?.getAll()!!
         val recycler = view?.findViewById<RecyclerView>(R.id.recycler_playlist)
-        val adapter = PlaylistAdapter(data)
+        val adapter = activity?.let { PlaylistAdapter(data , it) }
         recycler?.adapter = adapter
         recycler?.layoutManager = LinearLayoutManager(context)
 

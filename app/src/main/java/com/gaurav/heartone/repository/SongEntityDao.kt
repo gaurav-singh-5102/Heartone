@@ -10,12 +10,13 @@ interface SongEntityDao {
     @Query("SELECT * FROM songentity")
     fun getAll(): List<SongEntity>
 
-    @Query("SELECT * FROM songentity WHERE id IN (:songIds)")
-    fun loadAllByIds(songIds: List<String>): List<SongEntity>
+    @Query("SELECT * FROM songentity WHERE playlist = :pid")
+    fun loadAllByIds(pid : String): List<SongEntity>
 
     @Insert
     fun insertAll(vararg song: SongEntity)
 
     @Delete
     fun delete(song: SongEntity)
+
 }

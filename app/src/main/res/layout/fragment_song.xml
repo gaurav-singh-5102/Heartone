@@ -9,24 +9,23 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-
         <TextView
             android:id="@+id/textView7"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
             android:fontFamily="@font/inter"
-            android:text="@string/select_playlist"
+            android:text="@string/select_song"
             android:textColor="@color/black"
             android:textStyle="bold"
-            app:layout_constraintBottom_toTopOf="@+id/recycler_playlist"
+            app:layout_constraintBottom_toTopOf="@+id/recycler_song"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.162"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
         <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/recycler_playlist"
+            android:id="@+id/recycler_song"
             android:layout_width="342dp"
             android:layout_height="645dp"
             android:paddingStart="3dp"
@@ -37,7 +36,7 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintVertical_bias="0.341"
-            tools:listitem="@layout/cardview_playlist" />
+            tools:listitem="@layout/cardview_song" />
 
 
     </androidx.constraintlayout.widget.ConstraintLayout>

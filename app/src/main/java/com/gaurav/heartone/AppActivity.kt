@@ -28,7 +28,7 @@ class AppActivity : AppCompatActivity() {
         supportActionBar?.hide()
     }
 //
-    // function that will be called when user clicks the pcitureAction buttton
+    // function that will be called when user clicks the pictureAction button
     //first calls the checkAndGetPermission function then launches the Intent for
     // camera using resultLauncher
     

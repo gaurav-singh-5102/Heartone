@@ -29,8 +29,6 @@ import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
 
-// TODO: Rename parameter arguments, choose names that match
-// the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
 
 var requestBody: MultipartBody? = null
 
@@ -54,7 +52,7 @@ class moodselection : Fragment(R.layout.fragment_moodselection) {
         val editor = sharedPreferences?.edit()
         val HttpClient = OkHttpClient()
         val fragmentTransaction = parentFragmentManager.beginTransaction()
-        fragmentTransaction.replace(R.id.fragmentContainer, Playlist())
+        fragmentTransaction.replace(R.id.fragmentContainer, Loading())
         pictureButton?.setOnClickListener() {
             if (pictureButton.text != "Continue") {
                 openCamera()
