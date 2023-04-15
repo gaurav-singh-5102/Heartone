@@ -48,29 +48,23 @@ class SongAdapter(private val data:List<SongEntity>,private val activity: Fragme
     }
 
     private fun getPercentage(item: SongEntity): String {
-        val xRange = -1..1
-        val yRange = -1..1
-        val quadrants = mutableMapOf<String, List<Pair<Double, Double>>>()
-        quadrants["angry"] =
-            listOf(Pair(xRange.first.toDouble(), yRange.last.toDouble()), Pair(0.0, 0.0))
-        quadrants["sad"] =
-            listOf(Pair(xRange.first.toDouble(), yRange.first.toDouble()), Pair(0.0, 0.0))
-        quadrants["neutral"] =
-            listOf(Pair(xRange.last.toDouble(), yRange.first.toDouble()), Pair(0.0, 0.0))
-        quadrants["happy"] =
-            listOf(Pair(xRange.last.toDouble(), yRange.last.toDouble()), Pair(0.0, 0.0))
+        val regions = mutableMapOf<String, Pair<Float,Float>>()
+        regions["angry"] = Pair(0.5f,-0.5f)
+        regions["sad"] = Pair(-0.5f,-0.5f)
+        regions["neutral"] = Pair(-0.5f,0.5f)
+        regions["happy"] =Pair(0.5f,0.5f)
         val sharedPreferences: SharedPreferences? = activity.getSharedPreferences(
             "sharedPrefs",
             Context.MODE_PRIVATE
         )
+        var songPoint = Pair(item.valence.toFloat(),item.energy.toFloat())
         val mood = sharedPreferences?.getString("MOOD", null)
-        val corner = quadrants[mood]!![0]
-        val distance = sqrt(
-            (item.valence?.minus(corner.first)!!).pow(2.0) + (item.energy?.minus(
-                corner.second
-            )!!).pow(2.0)
-        )
-        return String.format("%.2f",distance / sqrt(2.0) * 100)
+        val distance = regions[mood]?.let { calculateDistance(songPoint, it) }
+        return String.format("%.2f",(1 - distance!!) * 100)
+    }
+
+    private fun calculateDistance(pointA : Pair<Float,Float>, pointB: Pair<Float,Float>):Float{
+        return sqrt((pointA.first - pointB.first).pow(2)+ (pointA.second - pointB.second).pow(2))
     }
 
     private fun playSong(item: SongEntity){

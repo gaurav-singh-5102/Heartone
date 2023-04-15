@@ -11,6 +11,6 @@ data class SongEntity(
     @ColumnInfo(name = "playlist") val pid : String?,
     @ColumnInfo(name = "image") val image : String?,
     @ColumnInfo(name = "name") val name : String?,
-    @ColumnInfo(name = "energy") val energy : Double?,
-    @ColumnInfo(name = "valence") val valence : Double?
+    @ColumnInfo(name = "energy") val energy : Double,
+    @ColumnInfo(name = "valence") val valence : Double
 )

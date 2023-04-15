@@ -1,6 +1,5 @@
 package com.gaurav.heartone
 
-import com.gaurav.heartone.repository.SongEntity
 
 object DataHolder {
     private val data: MutableMap<String, Any> = HashMap()
